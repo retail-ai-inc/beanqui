@@ -11,6 +11,7 @@ import (
 )
 
 type User struct {
+	Account string `json:"account"`
 }
 
 func NewUser() *User {
@@ -85,16 +86,21 @@ func (t *User) Add(ctx *BeanContext) error {
 	return res.Json(w, http.StatusOK)
 }
 
+type UserInfo struct {
+	Account string `json:"account"`
+}
+
 func (t *User) Delete(ctx *BeanContext) error {
 
 	res, cancel := response.Get()
 	defer cancel()
-	account := ctx.Request.FormValue("account")
+
+	account := ctx.Request.PostFormValue("account")
+
 	if account == "" {
 		res.Code = errorx.MissParameterMsg
 		res.Msg = "missing account field"
 		return res.Json(ctx.Writer, http.StatusOK)
-
 	}
 
 	key := strings.Join([]string{viper.GetString("redis.prefix"), "users", account}, ":")
