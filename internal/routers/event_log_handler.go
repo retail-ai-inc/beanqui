@@ -132,11 +132,6 @@ func (t *EventLog) Delete(ctx *BeanContext) error {
 	return res.Json(w, http.StatusOK)
 }
 
-type editInfo struct {
-	Payload any    `json:"payload"`
-	Id      string `json:"id"`
-}
-
 func (t *EventLog) Edit(ctx *BeanContext) error {
 	res, cancel := response.Get()
 	defer cancel()
