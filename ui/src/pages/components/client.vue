@@ -1,30 +1,30 @@
 <template>
   <div class="card">
-    <div class="card-header">
-      Client
+    <div class="card-header bg-secondary text-white">
+      <h5>Client</h5>
     </div>
-    <div class="mb-3 row" style="padding: 0 1.5rem">
-      <label for="connected" class="col-sm-7 col-form-label">Connected Clients</label>
+    <div class="mb-3 row text-start p-015">
+      <label class="col-sm-7 col-form-label">Connected Clients</label>
       <div class="col-sm-5">
-        <input type="text" readonly class="form-control-plaintext" id="connected" :value="clients.connected_clients">
+          {{ clients.connected_clients }}
       </div>
     </div>
-    <div class="mb-3 row" style="padding: 0 1.5rem">
-      <label for="blocked" class="col-sm-7 col-form-label">Blocked Clients</label>
+    <div class="mb-3 row text-start p-015">
+      <label class="col-sm-7 col-form-label">Blocked Clients</label>
       <div class="col-sm-5">
-        <input type="text" readonly class="form-control-plaintext" id="blocked" :value="clients.blocked_clients">
+        {{ clients.blocked_clients }}
       </div>
     </div>
-    <div class="mb-3 row" style="padding: 0 1.5rem">
-      <label for="maxInBuffer" class="col-sm-7 col-form-label">Client Recent Max Input Buffer</label>
+    <div class="mb-3 row text-start p-015">
+      <label class="col-sm-7 col-form-label">Client Recent Max Input Buffer</label>
       <div class="col-sm-5">
-        <input type="text" readonly class="form-control-plaintext" id="maxInBuffer" :value="clients.client_recent_max_input_buffer">
+        {{ clients.client_recent_max_input_buffer}}
       </div>
     </div>
-    <div class="mb-3 row" style="padding: 0 1.5rem">
-      <label for="maxOutBuffer" class="col-sm-7 col-form-label">Client Recent Max Output Buffer</label>
+    <div class="mb-3 row text-start p-015">
+      <label class="col-sm-7 col-form-label">Client Recent Max Output Buffer</label>
       <div class="col-sm-5">
-        <input type="text" readonly class="form-control-plaintext" id="maxOutBuffer" :value="clients.client_recent_max_output_buffer">
+        {{ clients.client_recent_max_output_buffer}}
       </div>
     </div>
   </div>
@@ -33,7 +33,15 @@
 import {defineProps} from "vue";
 
 const props = defineProps({
-  clients:{}
+  clients: {}
 })
 
 </script>
+<style>
+.p-015 {
+  padding: 0 1.5rem;
+}
+.p-015 label {
+  font-weight: bold;
+}
+</style>
