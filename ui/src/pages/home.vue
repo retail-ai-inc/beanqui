@@ -1,52 +1,50 @@
 <template>
 
   <div class="home">
-    <div class="container-fluid text-center">
-      <Dashboard   :queue_total="queue_total"
-                   :num_cpu="num_cpu"
-                   :fail_count="fail_count"
-                   :success_count="success_count"
-                   :db_size="db_size"/>
+    <div class="chart-container">
+      <div class="chart-h">
+        <v-chart class="chart" :option="queuedMessagesOption"/>
+      </div>
+      <div class="chart-h">
+        <v-chart class="chart" :option="refererOption"/>
+      </div>
+      <div class="chart-h">
+        <v-chart class="chart" :option="messageRatesOption"/>
+      </div>
+      <div class="chart-h">
+        <v-chart class="chart" :option="barOption"/>
+      </div>
+    </div>
+
+    <div class="container-fluid" style="margin-bottom: 40px">
+      <Dashboard :queue_total="queue_total"
+                 :num_cpu="num_cpu"
+                 :fail_count="fail_count"
+                 :success_count="success_count"
+                 :db_size="db_size"/>
     </div>
 
     <div class="container-fluid text-center">
       <div class="row justify-content-between">
-        <div class="col-5">
-          <Command :commands="commands" />
-          <KeySpace :keyspace="keyspace"  style="margin-top: 1rem;"/>
+        <div class="col-4">
+          <Command :commands="commands"/>
+          <KeySpace :keyspace="keyspace" class="mt-1"/>
         </div>
         <div class="col-4">
-          <Client :clients="clients" />
-          <Memory :memory="memory" style="margin-top: 1rem;"/>
+          <Client :clients="clients"/>
+          <Memory :memory="memory" class="mt-1"/>
         </div>
-        <div class="col-3">
-          <Stats :stats="stats" />
+        <div class="col-4">
+          <Stats :stats="stats"/>
         </div>
       </div>
     </div>
 
-
-<!--    <div class="d-flex justify-content-between">-->
-
-<!--        <div style="width:30%">-->
-<!--          <v-chart class="chart" :option="barOption" />-->
-<!--        </div>-->
-<!--        <div style="width:30%">-->
-<!--          <v-chart class="chart" :option="lineOption"/>-->
-<!--        </div>-->
-<!--        <div style="width: 30%">-->
-<!--          <v-chart class="chart" :option="gaugeOption" />-->
-<!--        </div>-->
-
-<!--    </div>-->
-
   </div>
-
-
 </template>
 
 <script setup>
-import {ref,reactive,onMounted,toRefs,} from "vue";
+import {ref, reactive, onMounted, toRefs,} from "vue";
 import Dashboard from "./components/dashboard.vue";
 import Command from "./components/command.vue";
 import Client from "./components/client.vue";
@@ -56,31 +54,164 @@ import Stats from "./components/stats.vue";
 
 
 let data = reactive({
-  "queue_total":0,
-  "db_size":0,
-  "num_cpu":0,
-  "fail_count":0,
-  "success_count":0,
-  "commands":[],
-  "clients":{},
-  "stats":{},
-  "keyspace":[],
-  "memory":{}
+  "queue_total": 0,
+  "db_size": 0,
+  "num_cpu": 0,
+  "fail_count": 0,
+  "success_count": 0,
+  "commands": [],
+  "clients": {},
+  "stats": {},
+  "keyspace": [],
+  "memory": {}
 })
-function getTotal(){
+
+function getTotal() {
   return request.get("dashboard");
 }
-onMounted(async ()=>{
+
+onMounted(async () => {
 
   let total = await getTotal();
 
-  Object.assign(data,total.data);
+  Object.assign(data, total.data);
   data.commands = total.data.commands;
   data.clients = total.data.clients;
   data.stats = total.data.stats;
   data.keyspace = total.data.keyspace;
   data.memory = total.data.memory;
 })
+
+const queuedMessagesOption = ref({
+  title: {
+    text: 'Queued messages',
+    subtext: '(chart:last minute)(?)',
+  },
+  tooltip: {
+    trigger: 'axis'
+  },
+  legend: {
+    data: ['Ready', 'Unacked', 'Total']
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  toolbox: {
+    feature: {
+      // saveAsImage: {}
+    }
+  },
+  xAxis: {
+    type: 'category',
+    boundaryGap: false,
+    data: ['09:02:10', '09:02:20', '09:02:30', '09:02:40', '09:02:50', '09:03:00']
+  },
+  yAxis: {
+    type: 'value',
+    axisLine: {
+      show: true,
+    }
+
+  },
+  series: [
+    {
+      name: 'Ready',
+      type: 'line',
+      data: [120, 132, 101, 134, 90, 230]
+    },
+    {
+      name: 'Unacked',
+      type: 'line',
+      data: [220, 182, 191, 234, 290, 330]
+    },
+    {
+      name: 'Total',
+      type: 'line',
+      data: [150, 232, 201, 154, 190, 330]
+    }
+  ]
+});
+
+const messageRatesOption = ref({
+  title: {
+    text: 'Message rates',
+    subtext: '(chart:last minute)(?)',
+  },
+
+  tooltip: {
+    trigger: 'axis'
+  },
+  legend: {
+    data: ['Publish', 'Confirm', 'Deliver', 'Redelivered', 'Acknowledge', 'Get', 'Get(noack)']
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  toolbox: {
+    feature: {
+      // saveAsImage: {}
+    }
+  },
+  xAxis: {
+    type: 'category',
+    boundaryGap: false,
+    data: ['09:02:10', '09:02:20', '09:02:30', '09:02:40', '09:02:50', '09:03:00']
+  },
+  yAxis: {
+    type: 'value',
+    axisLine: {
+      show: true,
+    },
+    axisLabel: {
+      formatter: function (value) {
+        return value + '/s';
+      }
+    }
+  },
+  series: [
+    {
+      name: 'Publish',
+      type: 'line',
+      data: [120, 132, 101, 134, 90, 230]
+    },
+    {
+      name: 'Confirm',
+      type: 'line',
+      data: [220, 182, 191, 234, 290, 330]
+    },
+    {
+      name: 'Deliver',
+      type: 'line',
+      data: [150, 232, 201, 154, 190, 330]
+    },
+    {
+      name: 'Redelivered',
+      type: 'line',
+      data: [320, 332, 301, 334, 390, 330]
+    },
+    {
+      name: 'Acknowledge',
+      type: 'line',
+      data: [820, 932, 901, 934, 1290, 1330]
+    },
+    {
+      name: 'Get',
+      type: 'line',
+      data: [820, 932, 901, 934, 1290, 1330]
+    },
+    {
+      name: 'Get(noack)',
+      type: 'line',
+      data: [820, 932, 901, 934, 1290, 1330]
+    }
+  ]
+});
 
 const barOption = ref({
   title: {
@@ -96,7 +227,7 @@ const barOption = ref({
   },
   series: [
     {
-      data: [120, 200, 150, 80, 70, 110, 130],
+      data: [120, 200, 350, 420, 170, 210, 130],
       type: 'bar',
       showBackground: true,
       backgroundStyle: {
@@ -105,196 +236,81 @@ const barOption = ref({
     }
   ]
 });
-const lineOption = ref({
+const refererOption = ref({
   title: {
-    text: 'Tasks Processed'
+    text: 'Referer of a Website',
+    subtext: 'Fake Data',
+    left: 'center'
   },
   tooltip: {
-    trigger: 'axis'
+    trigger: 'item'
   },
   legend: {
-    bottom:"10",
-    data: [
-        {
-          name:"succeed",
-          lineStyle: {
-            color: '#198754'
-          },
-          itemStyle:{
-            color:"#198754"
-          }
-        },
-        {
-          name:"failed",
-          lineStyle:{
-            color:'#dc3545'
-          },
-          itemStyle: {
-            color:'#dc3545'
-          }
-        }
-    ]
-  },
-  toolbox: {
-    feature: {
-      //saveAsImage: {}
-    }
-  },
-  xAxis: {
-    type: 'category',
-    boundaryGap: false,
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  yAxis: {
-    type: 'value'
+    orient: 'vertical',
+    left: 'left'
   },
   series: [
     {
-      name: 'succeed',
-      type: 'line',
-      lineStyle: {
-        color: '#198754'
-      },
-      itemStyle:{
-        color:"#198754"
-      },
-      data:[220, 182, 191, 234, 290, 330, 310]
-    },
-    {
-      name: 'failed',
-      type: 'line',
-      lineStyle:{
-        color:'#dc3545'
-      },
-      itemStyle:{
-        color:"#dc3545"
-      },
-      data:[120, 132, 101, 134, 90, 230, 210]
+      name: 'Access From',
+      type: 'pie',
+      radius: '50%',
+      data: [
+        { value: 1048, name: 'Search Engine' },
+        { value: 735, name: 'Direct' },
+        { value: 580, name: 'Email' },
+        { value: 484, name: 'Union Ads' },
+        { value: 300, name: 'Video Ads' }
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
     }
   ]
 });
 
-const gaugeOption = ref({
-  title:{
-    text:"Memory usage"
-  },
-  series: [
-    {
-      type: 'gauge',
-      center: ['50%', '60%'],
-      startAngle: 200,
-      endAngle: -20,
-      min: 0,
-      max: 60,
-      splitNumber: 5,
-      itemStyle: {
-        color: '#FFAB91'
-      },
-      progress: {
-        show: true,
-        width: 30
-      },
-      pointer: {
-        show: false
-      },
-      axisLine: {
-        lineStyle: {
-          width: 30
-        }
-      },
-      axisTick: {
-        distance: -45,
-        splitNumber: 5,
-        lineStyle: {
-          width: 2,
-          color: '#999'
-        }
-      },
-      splitLine: {
-        distance: -52,
-        length: 14,
-        lineStyle: {
-          width: 3,
-          color: '#999'
-        }
-      },
-      axisLabel: {
-        distance: -20,
-        color: '#999',
-        fontSize: 20
-      },
-      anchor: {
-        show: false
-      },
-      title: {
-        show: false
-      },
-      detail: {
-        valueAnimation: true,
-        width: '60%',
-        lineHeight: 40,
-        borderRadius: 8,
-        offsetCenter: [0, '-15%'],
-        fontSize: 60,
-        fontWeight: 'bolder',
-        formatter: '{value} M',
-        color: 'inherit'
-      },
-      data: [
-        {
-          value: 20
-        }
-      ]
-    },
-    {
-      type: 'gauge',
-      center: ['50%', '60%'],
-      startAngle: 200,
-      endAngle: -20,
-      min: 0,
-      max: 60,
-      itemStyle: {
-        color: '#FD7347'
-      },
-      progress: {
-        show: true,
-        width: 8
-      },
-      pointer: {
-        show: false
-      },
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      },
-      splitLine: {
-        show: false
-      },
-      axisLabel: {
-        show: false
-      },
-      detail: {
-        show: false
-      },
-      data: [
-        {
-          value: 20
-        }
-      ]
-    }
-  ]
-});
-const {queue_total,db_size,num_cpu,fail_count,success_count,commands,clients,stats,keyspace,memory} = toRefs(data);
+const {
+  queue_total,
+  db_size,
+  num_cpu,
+  fail_count,
+  success_count,
+  commands,
+  clients,
+  stats,
+  keyspace,
+  memory
+} = toRefs(data);
 </script>
 <style scoped>
-.home{
+.home {
   transition: opacity 0.5s ease;
   opacity: 1;
 }
-.chart{
-  width:100%;height:80vh;
+
+
+.mt-1 {
+  margin-top: 1rem;
 }
+
+.chart-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 两列，每列宽度相等 */
+  gap: 10px; /* 可选：设置元素之间的间距 */
+}
+
+.chart-h {
+  height: 280px;
+}
+
+.chart {
+  background-color: #ffffff; /* 示例背景色，可以根据需要更改 */
+  /*border: 1px solid #ccc; !* 示例边框，可以根据需要更改 *!*/
+  box-sizing: border-box; /* 包括边框和内边距在内的宽度和高度计算 */
+}
+
 
 </style>
