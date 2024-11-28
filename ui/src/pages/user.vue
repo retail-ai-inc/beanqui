@@ -65,14 +65,14 @@
             </div>
             <div class="mb-3">
               <label for="typeSelect" class="form-label">Type</label>
-              <select class="form-select" aria-label="Type Select" v-model="userForm.type">
+              <select class="form-select" aria-label="Type Select" id="typeSelect" v-model="userForm.type">
                 <option selected>Open this select menu</option>
                 <option value="normal">Normal</option>
                 <option value="google">Google</option>
               </select>
             </div>
             <div class="mb-3">
-              <label for="activeRadio" class="form-label">Active</label>
+              <label  class="form-label">Active</label>
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="1" v-model="userForm.active" :checked="userForm.active == 1">
                 <label class="form-check-label" for="flexRadioDefault1">

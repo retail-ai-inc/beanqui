@@ -1,16 +1,20 @@
 package routers
 
 import (
+	"context"
 	"fmt"
+	"github.com/retail-ai-inc/beanqui/internal/email"
 	"github.com/retail-ai-inc/beanqui/internal/redisx"
 	"github.com/retail-ai-inc/beanqui/internal/routers/errorx"
 	"github.com/retail-ai-inc/beanqui/internal/routers/response"
 	"github.com/spf13/viper"
+	"log"
 	"net/http"
 	"strings"
 )
 
 type User struct {
+	Account string `json:"account"`
 }
 
 func NewUser() *User {
@@ -49,8 +53,8 @@ func (t *User) List(ctx *BeanContext) error {
 }
 
 func (t *User) Add(ctx *BeanContext) error {
-	res, cancal := response.Get()
-	defer cancal()
+	res, cancel := response.Get()
+	defer cancel()
 
 	r := ctx.Request
 	w := ctx.Writer
@@ -82,19 +86,39 @@ func (t *User) Add(ctx *BeanContext) error {
 		return res.Json(w, http.StatusOK)
 
 	}
+	go func(ctx2 context.Context) {
+
+		code, body, header, err := email.DefaultSend(ctx2, "BeanqUI Manager", account, &email.EmbedData{
+			Title: "Active Email",
+			Name:  account,
+			Link:  "", // website url
+		})
+		if err != nil {
+			log.Printf("Send Email Error:%+v \n", err)
+		}
+		if code != 200 {
+			log.Printf("Code:%+v,Body:%+v,Header:%+v \n", code, body, header)
+		}
+
+	}(r.Context())
 	return res.Json(w, http.StatusOK)
+}
+
+type UserInfo struct {
+	Account string `json:"account"`
 }
 
 func (t *User) Delete(ctx *BeanContext) error {
 
 	res, cancel := response.Get()
 	defer cancel()
-	account := ctx.Request.FormValue("account")
+
+	account := ctx.Request.PostFormValue("account")
+
 	if account == "" {
 		res.Code = errorx.MissParameterMsg
 		res.Msg = "missing account field"
 		return res.Json(ctx.Writer, http.StatusOK)
-
 	}
 
 	key := strings.Join([]string{viper.GetString("redis.prefix"), "users", account}, ":")

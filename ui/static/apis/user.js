@@ -6,12 +6,10 @@ const userApi = {
         return request.post("/user/add",data);
     },
     Delete(account){
-        return request.delete(`/user/del?account=${account}`);
+        let params = {account:account};
+        return request.post(`/user/del`,params);
     },
     Edit(data){
-        const headers = {
-            "Content-Type":"application/x-www-form-urlencoded"
-        }
-        return request.put(`/user/edit`,data,{headers:headers});
+        return request.post(`/user/edit`,data);
     }
 }
